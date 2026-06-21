@@ -679,14 +679,17 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <div id="page-complaints" style="display:none;">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">All Complaints</div>
-          <div class="card-action">Export CSV</div>
+          <div>
+            <div class="card-title">All Complaints</div>
+            <div class="card-sub">Live data from submitted reports</div>
+          </div>
+          <div class="card-action" onclick="loadComplaints()">Refresh</div>
         </div>
-        <div class="complaints-list">
-          <div class="complaint-item"><div class="ci-priority priority-critical"></div><div class="ci-info"><div class="ci-title">Expired dairy products — Nashik</div><div class="ci-meta">2 hours ago · Score: 92</div></div><div class="ci-score score-critical">92</div><div class="ci-arrow">›</div></div>
-          <div class="complaint-item"><div class="ci-priority priority-critical"></div><div class="ci-info"><div class="ci-title">Illegal tobacco near school — Mumbai</div><div class="ci-meta">5 hours ago · Score: 88</div></div><div class="ci-score score-critical">88</div><div class="ci-arrow">›</div></div>
-          <div class="complaint-item"><div class="ci-priority priority-high"></div><div class="ci-info"><div class="ci-title">Kitchen hygiene violation — Pune</div><div class="ci-meta">Yesterday · Score: 74</div></div><div class="ci-score score-high">74</div><div class="ci-arrow">›</div></div>
-          <div class="complaint-item"><div class="ci-priority priority-medium"></div><div class="ci-info"><div class="ci-title">Oil adulteration suspected — Nagpur</div><div class="ci-meta">Yesterday · Score: 61</div></div><div class="ci-score score-medium">61</div><div class="ci-arrow">›</div></div>
+        <div class="complaints-list" id="complaints-list-real">
+          <div class="empty">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">Loading complaints...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -722,6 +725,84 @@ function animateCounters(){
 }
 setTimeout(animateCounters,200);
 
+// Load real complaints from backend
+function timeAgo(timestamp){
+  const diff=(new Date()-new Date(timestamp))/1000;
+  if(diff<3600)return Math.floor(diff/60)+' min ago';
+  if(diff<86400)return Math.floor(diff/3600)+' hours ago';
+  return Math.floor(diff/86400)+' days ago';
+}
+
+function scoreClass(score){
+  if(score>=80)return {priority:'priority-critical',score:'score-critical'};
+  if(score>=60)return {priority:'priority-high',score:'score-high'};
+  return {priority:'priority-medium',score:'score-medium'};
+}
+
+async function loadComplaints(){
+  const container=document.getElementById('complaints-list-real');
+  try{
+    const res=await fetch('/complaints');
+    const data=await res.json();
+    if(!data.length){
+      container.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No complaints yet. Submit one to see it here.</div></div>';
+      return;
+    }
+    container.innerHTML=data.map(c=>{
+      const cls=scoreClass(c.score);
+      return `<div class="complaint-item">
+        <div class="ci-priority ${cls.priority}"></div>
+        <div class="ci-info">
+          <div class="ci-title">${c.summary||c.type}</div>
+          <div class="ci-meta">${c.district||'Maharashtra'} · ${timeAgo(c.timestamp)} · AI: ${c.category||c.type}</div>
+        </div>
+        <div class="ci-score ${cls.score}">${c.score}</div>
+        <div class="ci-arrow">›</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    container.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load complaints.</div></div>';
+  }
+}
+
+async function loadDashboardComplaints(){
+  try{
+    const res=await fetch('/complaints');
+    const data=await res.json();
+    const container=document.querySelector('#page-dashboard .complaints-list');
+    if(!container)return;
+    if(!data.length)return;
+    container.innerHTML=data.slice(0,4).map(c=>{
+      const cls=scoreClass(c.score);
+      return `<div class="complaint-item">
+        <div class="ci-priority ${cls.priority}"></div>
+        <div class="ci-info">
+          <div class="ci-title">${c.summary||c.type}</div>
+          <div class="ci-meta">${c.district||'Maharashtra'} · ${timeAgo(c.timestamp)} · AI: ${c.category||c.type}</div>
+        </div>
+        <div class="ci-score ${cls.score}">${c.score}</div>
+        <div class="ci-arrow">›</div>
+      </div>`;
+    }).join('');
+  }catch(e){}
+}
+
+async function loadStats(){
+  try{
+    const res=await fetch('/stats');
+    const data=await res.json();
+    const cards=document.querySelectorAll('.stat-value');
+    if(cards[0])cards[0].setAttribute('data-target',data.critical||0);
+    if(cards[1])cards[1].setAttribute('data-target',data.pending||0);
+    if(cards[2])cards[2].setAttribute('data-target',data.resolved||0);
+  }catch(e){}
+}
+
+// Load real data on page load
+window.addEventListener('DOMContentLoaded',()=>{
+  loadDashboardComplaints();
+});
+
 // Page navigation
 const pages={
   dashboard:{title:'Dashboard',sub:'Maharashtra Food Safety Overview'},
@@ -738,6 +819,8 @@ function showPage(p){
   event.currentTarget.classList.add('active');
   document.getElementById('pageTitle').textContent=pages[p].title;
   document.getElementById('pageSub').textContent=pages[p].sub;
+  if(p==='complaints')loadComplaints();
+  if(p==='dashboard')loadDashboardComplaints();
 }
 
 // AI Complaint Analysis
@@ -765,6 +848,8 @@ async function analyzeComplaint(){
   }
   btn.textContent='🤖 Analyze & Submit with AI';btn.disabled=false;
   showToast('✅ Complaint submitted and analyzed!');
+  loadDashboardComplaints();
+  loadStats();
 }
 
 function showResult(score,tags,summary){
