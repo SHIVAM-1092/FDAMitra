@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDAMitra — Maharashtra Food Safety Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0A1628;
+  --navy2:#132238;
+  --saffron:#FF6B2B;
+  --saffron2:#FF8C55;
+  --green:#16A34A;
+  --red:#DC2626;
+  --yellow:#D97706;
+  --bg:#F7F8FA;
+  --white:#FFFFFF;
+  --border:#E5E7EB;
+  --text:#111827;
+  --text2:#6B7280;
+  --text3:#9CA3AF;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:240px 1fr;height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+.sidebar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:200px;
+  background:linear-gradient(to top,rgba(255,107,43,0.06),transparent);
+  pointer-events:none;
+}
+
+.sb-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.sb-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(255,107,43,0.35);
+}
+.sb-title{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.3px;}
+.sb-sub{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.8px;text-transform:uppercase;}
+.sb-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.2);
+  border-radius:20px;padding:4px 10px;
+}
+.sb-badge-dot{width:5px;height:5px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.5)}70%{opacity:.7;box-shadow:0 0 0 5px rgba(74,222,128,0)}}
+.sb-badge span{font-size:10px;color:#4ade80;font-weight:500;}
+
+.sb-nav{padding:16px 12px;flex:1;}
+.sb-section{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;padding:0 8px;margin:16px 0 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:8px;cursor:pointer;
+  transition:all 0.15s;margin-bottom:2px;
+  color:rgba(255,255,255,0.5);font-size:13px;font-weight:400;
+}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+.nav-item.active{background:rgba(255,107,43,0.15);color:#fff;font-weight:500;}
+.nav-item.active .nav-icon{color:var(--saffron);}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--saffron);color:#fff;font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;}
+
+.sb-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.06);}
+.officer-card{
+  display:flex;align-items:center;gap:10px;
+  padding:10px;border-radius:10px;
+  background:rgba(255,255,255,0.04);
+}
+.officer-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.officer-name{font-size:12px;font-weight:500;color:#fff;}
+.officer-role{font-size:10px;color:rgba(255,255,255,0.35);}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;}
+
+/* TOP BAR */
+.topbar{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:8px;}
+.page-title{font-size:15px;font-weight:600;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text2);}
+.sep{color:var(--border);font-size:16px;margin:0 4px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.date-pill{font-size:12px;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:6px 14px;border-radius:8px;}
+.alert-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;position:relative;transition:all 0.15s;
+}
+.alert-btn:hover{background:var(--bg);}
+.alert-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--saffron);border-radius:50%;border:1.5px solid white;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:14px;padding:18px 20px;
+  position:relative;overflow:hidden;
+  transition:box-shadow 0.2s;cursor:default;
+}
+.stat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.07);}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:14px 14px 0 0;
+}
+.stat-card.red::before{background:var(--red);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.saffron::before{background:var(--saffron);}
+.stat-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.stat-value{font-size:28px;font-weight:600;letter-spacing:-1px;color:var(--text);margin-bottom:4px;}
+.stat-change{font-size:11px;display:flex;align-items:center;gap:4px;}
+.stat-change.up{color:var(--red);}
+.stat-change.down{color:var(--green);}
+.stat-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:0.15;}
+
+/* GRID 2 COL */
+.grid2{display:grid;grid-template-columns:1fr 360px;gap:14px;}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.card-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:13px;font-weight:600;color:var(--text);}
+.card-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.card-action{
+  font-size:11px;color:var(--saffron);font-weight:500;cursor:pointer;
+  background:rgba(255,107,43,0.07);border:1px solid rgba(255,107,43,0.15);
+  padding:5px 12px;border-radius:6px;transition:all 0.15s;
+}
+.card-action:hover{background:rgba(255,107,43,0.12);}
+
+/* MAP AREA */
+.map-area{padding:20px;position:relative;}
+.map-svg{width:100%;height:280px;}
+
+/* Maharashtra SVG districts - simplified shapes */
+.district{cursor:pointer;transition:all 0.2s;stroke:#fff;stroke-width:0.8;}
+.district:hover{opacity:0.8;stroke-width:1.5;}
+.district.critical{fill:#DC2626;}
+.district.high{fill:#F97316;}
+.district.medium{fill:#FBBF24;}
+.district.low{fill:#16A34A;}
+.district.none{fill:#D1FAE5;}
+
+.map-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* COMPLAINTS TABLE */
+.complaints-list{padding:0;}
+.complaint-item{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  transition:background 0.15s;cursor:pointer;
+}
+.complaint-item:last-child{border-bottom:none;}
+.complaint-item:hover{background:#FAFAFA;}
+.ci-priority{
+  width:6px;height:40px;border-radius:3px;flex-shrink:0;
+}
+.priority-critical{background:var(--red);}
+.priority-high{background:var(--yellow);}
+.priority-medium{background:#60A5FA;}
+.ci-info{flex:1;min-width:0;}
+.ci-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ci-meta{font-size:11px;color:var(--text2);}
+.ci-score{
+  font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;flex-shrink:0;
+}
+.score-critical{background:#FEF2F2;color:var(--red);}
+.score-high{background:#FFFBEB;color:var(--yellow);}
+.score-medium{background:#EFF6FF;color:#2563EB;}
+.ci-arrow{color:var(--text3);font-size:14px;flex-shrink:0;}
+
+/* SIDE PANEL */
+.side-panel{display:flex;flex-direction:column;gap:14px;}
+
+/* QUICK STATS */
+.quick-stat{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+}
+.quick-stat+.quick-stat{border-top:1px solid var(--border);}
+.qs-label{font-size:12px;color:var(--text2);}
+.qs-val{font-size:13px;font-weight:600;color:var(--text);}
+
+/* PRIORITY QUEUE */
+.pq-item{
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.pq-item:last-child{border-bottom:none;}
+.pq-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--saffron);color:#fff;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.pq-num.two{background:#F97316;}
+.pq-num.three{background:#FBBF24;color:var(--text);}
+.pq-info{flex:1;}
+.pq-name{font-size:12px;font-weight:500;color:var(--text);}
+.pq-area{font-size:11px;color:var(--text2);}
+.pq-tag{font-size:10px;padding:2px 8px;border-radius:10px;background:#FEF2F2;color:var(--red);font-weight:500;}
+
+/* COMPLAINT FORM */
+.form-area{padding:20px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;display:block;}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:9px 12px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:'Inter',sans-serif;color:var(--text);
+  background:var(--white);outline:none;
+  transition:border-color 0.15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(255,107,43,0.08);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.upload-area{
+  border:1.5px dashed var(--border);border-radius:8px;
+  padding:20px;text-align:center;cursor:pointer;
+  transition:all 0.15s;
+}
+.upload-area:hover{border-color:var(--saffron);background:rgba(255,107,43,0.03);}
+.upload-icon{font-size:24px;margin-bottom:6px;}
+.upload-text{font-size:12px;color:var(--text2);}
+.upload-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.submit-btn{
+  width:100%;padding:11px;border-radius:8px;border:none;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:all 0.2s;
+  box-shadow:0 4px 12px rgba(255,107,43,0.25);
+}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,107,43,0.35);}
+.submit-btn:active{transform:translateY(0);}
+
+/* AI RESULT */
+.ai-result{
+  margin-top:14px;padding:14px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(255,107,43,0.05),rgba(255,107,43,0.02));
+  border:1px solid rgba(255,107,43,0.15);
+  display:none;
+}
+.ai-result.show{display:block;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ai-result-title{font-size:11px;font-weight:600;color:var(--saffron);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.ai-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.ai-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+.tag-red{background:#FEF2F2;color:var(--red);}
+.tag-yellow{background:#FFFBEB;color:var(--yellow);}
+.tag-blue{background:#EFF6FF;color:#2563EB;}
+.priority-bar-wrap{margin-top:8px;}
+.priority-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.priority-bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.priority-bar-fill{height:100%;background:linear-gradient(90deg,var(--saffron),#FF4500);border-radius:3px;transition:width 1s ease;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;padding:16px 20px 0;border-bottom:1px solid var(--border);}
+.tab{
+  padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;
+  border-bottom:2px solid transparent;color:var(--text2);
+  transition:all 0.15s;margin-bottom:-1px;
+}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--saffron);border-bottom-color:var(--saffron);}
+
+/* EMPTY */
+.empty{padding:40px 20px;text-align:center;}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:0.4;}
+.empty-text{font-size:13px;color:var(--text2);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:100;
+  background:var(--navy);color:#fff;
+  padding:12px 18px;border-radius:10px;
+  font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  transform:translateY(80px);opacity:0;
+  transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.toast.show{transform:none;opacity:1;}
+.toast-icon{font-size:16px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="sb-icon">⚖️</div>
+      <div>
+        <div class="sb-title">FDAMitra</div>
+        <div class="sb-sub">Maharashtra FDA</div>
+      </div>
+    </div>
+    <div class="sb-badge">
+      <div class="sb-badge-dot"></div>
+      <span>System Live</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('complaints')">
+      <span class="nav-icon">📋</span> Complaints
+      <span class="nav-badge">12</span>
+    </div>
+    <div class="nav-item" onclick="showPage('map')">
+      <span class="nav-icon">🗺️</span> District Map
+    </div>
+
+    <div class="sb-section">Tools</div>
+    <div class="nav-item" onclick="showPage('submit')">
+      <span class="nav-icon">📤</span> Submit Complaint
+    </div>
+    <div class="nav-item" onclick="showPage('inspector')">
+      <span class="nav-icon">🔍</span> Inspector Queue
+    </div>
+    <div class="nav-item" onclick="showPage('reports')">
+      <span class="nav-icon">📁</span> Reports
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="officer-card">
+      <div class="officer-av">👮</div>
+      <div>
+        <div class="officer-name">FDA Inspector</div>
+        <div class="officer-role">Maharashtra · Pune Division</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="page-title" id="pageTitle">Dashboard</span>
+      <span class="sep">·</span>
+      <span class="page-sub" id="pageSub">Maharashtra Food Safety Overview</span>
+    </div>
+    <div class="topbar-right">
+      <div class="date-pill" id="dateDisplay"></div>
+      <button class="alert-btn" title="Alerts">🔔<div class="alert-dot"></div></button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard">
+      <!-- Stats -->
+      <div class="stat-row">
+        <div class="stat-card red">
+          <div class="stat-label">Critical Complaints</div>
+          <div class="stat-value" data-target="47">0</div>
+          <div class="stat-change up">↑ 8 this week</div>
+          <div class="stat-icon">🚨</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-label">Pending Inspections</div>
+          <div class="stat-value" data-target="124">0</div>
+          <div class="stat-change up">↑ 23 pending</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Resolved This Month</div>
+          <div class="stat-value" data-target="312">0</div>
+          <div class="stat-change down">↑ 18% vs last month</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card saffron">
+          <div class="stat-label">Districts Monitored</div>
+          <div class="stat-value" data-target="36">0</div>
+          <div class="stat-change down">All districts active</div>
+          <div class="stat-icon">🗺️</div>
+        </div>
+      </div>
+
+      <!-- Map + Side -->
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Maharashtra — Complaint Heat Map</div>
+              <div class="card-sub">District-wise food safety risk level · Live</div>
+            </div>
+            <div class="card-action">Full Map →</div>
+          </div>
+          <div class="map-area">
+            <svg class="map-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+              <!-- Simplified Maharashtra districts as blocks -->
+              <!-- Row 1 - North -->
+              <rect class="district critical" x="10" y="10" width="70" height="50" rx="4" title="Nashik"/>
+              <rect class="district high" x="90" y="10" width="70" height="50" rx="4"/>
+              <rect class="district medium" x="170" y="10" width="70" height="50" rx="4"/>
+              <rect class="district low" x="250" y="10" width="70" height="50" rx="4"/>
+              <rect class="district none" x="330" y="10" width="70" height="50" rx="4"/>
+              <rect class="district high" x="410" y="10" width="80" height="50" rx="4"/>
+              <!-- Row 2 -->
+              <rect class="district high" x="10" y="70" width="70" height="50" rx="4"/>
+              <rect class="district critical" x="90" y="70" width="70" height="50" rx="4"/>
+              <rect class="district medium" x="170" y="70" width="70" height="50" rx="4"/>
+              <rect class="district high" x="250" y="70" width="70" height="50" rx="4"/>
+              <rect class="district low" x="330" y="70" width="70" height="50" rx="4"/>
+              <rect class="district medium" x="410" y="70" width="80" height="50" rx="4"/>
+              <!-- Row 3 -->
+              <rect class="district medium" x="10" y="130" width="70" height="50" rx="4"/>
+              <rect class="district low" x="90" y="130" width="70" height="50" rx="4"/>
+              <rect class="district critical" x="170" y="130" width="70" height="50" rx="4"/>
+              <rect class="district medium" x="250" y="130" width="70" height="50" rx="4"/>
+              <rect class="district none" x="330" y="130" width="70" height="50" rx="4"/>
+              <rect class="district low" x="410" y="130" width="80" height="50" rx="4"/>
+              <!-- Row 4 - South -->
+              <rect class="district low" x="10" y="190" width="70" height="50" rx="4"/>
+              <rect class="district none" x="90" y="190" width="70" height="50" rx="4"/>
+              <rect class="district medium" x="170" y="190" width="70" height="50" rx="4"/>
+              <rect class="district high" x="250" y="190" width="70" height="50" rx="4"/>
+              <rect class="district low" x="330" y="190" width="70" height="50" rx="4"/>
+              <rect class="district none" x="410" y="190" width="80" height="50" rx="4"/>
+              <!-- Labels -->
+              <text x="45" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nashik</text>
+              <text x="125" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Dhule</text>
+              <text x="205" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Jalgaon</text>
+              <text x="285" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Aurangabad</text>
+              <text x="365" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Latur</text>
+              <text x="450" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nanded</text>
+              <text x="45" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Pune</text>
+              <text x="125" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Mumbai</text>
+              <text x="205" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Thane</text>
+              <text x="285" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Raigad</text>
+              <text x="365" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Satara</text>
+              <text x="450" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Sangli</text>
+              <text x="45" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Kolhapur</text>
+              <text x="125" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Solapur</text>
+              <text x="205" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nagpur</text>
+              <text x="285" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Wardha</text>
+              <text x="365" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Yavatmal</text>
+              <text x="450" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Amravati</text>
+              <text x="45" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Akola</text>
+              <text x="125" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Buldhana</text>
+              <text x="205" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Washim</text>
+              <text x="285" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Beed</text>
+              <text x="365" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Osmanabad</text>
+              <text x="450" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Hingoli</text>
+            </svg>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#DC2626"></div>Critical (10+)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F97316"></div>High (5-9)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#FBBF24"></div>Medium (2-4)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#16A34A"></div>Low (1)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#D1FAE5"></div>Clear</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+          <!-- Top Priority -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Today's Inspection Priority</div>
+                <div class="card-sub">AI-ranked · Updated 6:00 AM</div>
+              </div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num">1</div>
+              <div class="pq-info">
+                <div class="pq-name">Nashik Central Market</div>
+                <div class="pq-area">Nashik · 3 complaints</div>
+              </div>
+              <div class="pq-tag">Critical</div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num two">2</div>
+              <div class="pq-info">
+                <div class="pq-name">Mumbai Fish Market, Dadar</div>
+                <div class="pq-area">Mumbai · 7 complaints</div>
+              </div>
+              <div class="pq-tag">Critical</div>
+            </div>
+            <div class="pq-item">
+              <div class="pq-num three">3</div>
+              <div class="pq-info">
+                <div class="pq-name">Nagpur Pharma Wholesale</div>
+                <div class="pq-area">Nagpur · 2 complaints</div>
+              </div>
+              <div class="pq-tag" style="background:#FFFBEB;color:#D97706;">High</div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">District Summary</div>
+            </div>
+            <div class="quick-stat"><span class="qs-label">🔴 Critical Districts</span><span class="qs-val">3</span></div>
+            <div class="quick-stat"><span class="qs-label">🟡 High Risk Districts</span><span class="qs-val">8</span></div>
+            <div class="quick-stat"><span class="qs-label">🟢 Clear Districts</span><span class="qs-val">14</span></div>
+            <div class="quick-stat"><span class="qs-label">📊 Avg Resolution Time</span><span class="qs-val">4.2 days</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Complaints -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Recent Complaints — AI Classified</div>
+            <div class="card-sub">Automatically categorized and prioritized by AI</div>
+          </div>
+          <div class="card-action" onclick="showPage('complaints')">View All →</div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">All</div>
+          <div class="tab">Critical</div>
+          <div class="tab">Food</div>
+          <div class="tab">Drugs</div>
+        </div>
+        <div class="complaints-list">
+          <div class="complaint-item">
+            <div class="ci-priority priority-critical"></div>
+            <div class="ci-info">
+              <div class="ci-title">Expired dairy products found at Nashik dairy store — customer photo evidence</div>
+              <div class="ci-meta">Nashik · 2 hours ago · AI: Expired Product + Health Risk</div>
+            </div>
+            <div class="ci-score score-critical">92</div>
+            <div class="ci-arrow">›</div>
+          </div>
+          <div class="complaint-item">
+            <div class="ci-priority priority-critical"></div>
+            <div class="ci-info">
+              <div class="ci-title">Illegal tobacco products being sold near school — Mumbai Kurla</div>
+              <div class="ci-meta">Mumbai · 5 hours ago · AI: Illegal Sale + Minor Risk</div>
+            </div>
+            <div class="ci-score score-critical">88</div>
+            <div class="ci-arrow">›</div>
+          </div>
+          <div class="complaint-item">
+            <div class="ci-priority priority-high"></div>
+            <div class="ci-info">
+              <div class="ci-title">Restaurant kitchen hygiene violation — cockroaches spotted by customer</div>
+              <div class="ci-meta">Pune · Yesterday · AI: Hygiene Violation</div>
+            </div>
+            <div class="ci-score score-high">74</div>
+            <div class="ci-arrow">›</div>
+          </div>
+          <div class="complaint-item">
+            <div class="ci-priority priority-medium"></div>
+            <div class="ci-info">
+              <div class="ci-title">Suspected adulteration in cooking oil — Nagpur wholesale market</div>
+              <div class="ci-meta">Nagpur · Yesterday · AI: Adulteration Suspected</div>
+            </div>
+            <div class="ci-score score-medium">61</div>
+            <div class="ci-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT COMPLAINT PAGE -->
+    <div id="page-submit" style="display:none;">
+      <div style="max-width:600px;">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Submit Food Safety Complaint</div>
+              <div class="card-sub">AI will analyze and assign priority score automatically</div>
+            </div>
+          </div>
+          <div class="form-area">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Complainant Name</label>
+                <input class="form-input" type="text" placeholder="Your name (optional)"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">District</label>
+                <select class="form-select" id="district-select">
+                  <option value="">Select district</option>
+                  <option>Mumbai</option><option>Pune</option><option>Nashik</option>
+                  <option>Nagpur</option><option>Aurangabad</option><option>Thane</option>
+                  <option>Kolhapur</option><option>Solapur</option><option>Amravati</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location / Establishment Name</label>
+              <input class="form-input" type="text" placeholder="Shop name, restaurant, market etc."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Complaint Type</label>
+              <select class="form-select" id="complaint-type">
+                <option value="">Select type</option>
+                <option>Expired Products</option>
+                <option>Food Adulteration</option>
+                <option>Dirty Kitchen / Unhygienic</option>
+                <option>Illegal Tobacco / Gutkha Sale</option>
+                <option>Fake / Counterfeit Product</option>
+                <option>Wrong Labeling / Misbranding</option>
+                <option>Drug Quality Issue</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-textarea" id="complaint-desc" placeholder="Describe what you saw in detail..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photo Evidence</label>
+              <div class="upload-area">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">Click to upload photo</div>
+                <div class="upload-sub">JPG, PNG up to 10MB</div>
+              </div>
+            </div>
+            <button class="submit-btn" onclick="analyzeComplaint()">🤖 Analyze & Submit with AI</button>
+            <div class="ai-result" id="ai-result">
+              <div class="ai-result-title">🤖 AI Analysis Result</div>
+              <div class="ai-tags" id="ai-tags"></div>
+              <div class="priority-bar-wrap">
+                <div class="priority-bar-label">
+                  <span>Priority Score</span>
+                  <span id="priority-score-label">0/100</span>
+                </div>
+                <div class="priority-bar-track">
+                  <div class="priority-bar-fill" id="priority-bar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OTHER PAGES -->
+    <div id="page-complaints" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Complaints</div>
+          <div class="card-action">Export CSV</div>
+        </div>
+        <div class="complaints-list">
+          <div class="complaint-item"><div class="ci-priority priority-critical"></div><div class="ci-info"><div class="ci-title">Expired dairy products — Nashik</div><div class="ci-meta">2 hours ago · Score: 92</div></div><div class="ci-score score-critical">92</div><div class="ci-arrow">›</div></div>
+          <div class="complaint-item"><div class="ci-priority priority-critical"></div><div class="ci-info"><div class="ci-title">Illegal tobacco near school — Mumbai</div><div class="ci-meta">5 hours ago · Score: 88</div></div><div class="ci-score score-critical">88</div><div class="ci-arrow">›</div></div>
+          <div class="complaint-item"><div class="ci-priority priority-high"></div><div class="ci-info"><div class="ci-title">Kitchen hygiene violation — Pune</div><div class="ci-meta">Yesterday · Score: 74</div></div><div class="ci-score score-high">74</div><div class="ci-arrow">›</div></div>
+          <div class="complaint-item"><div class="ci-priority priority-medium"></div><div class="ci-info"><div class="ci-title">Oil adulteration suspected — Nagpur</div><div class="ci-meta">Yesterday · Score: 61</div></div><div class="ci-score score-medium">61</div><div class="ci-arrow">›</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="page-map" style="display:none;"><div class="card"><div class="card-header"><div class="card-title">Full District Map</div></div><div class="empty"><div class="empty-icon">🗺️</div><div class="empty-text">Full interactive map — coming soon</div></div></div></div>
+    <div id="page-inspector" style="display:none;"><div class="card"><div class="card-header"><div class="card-title">Inspector Queue</div></div><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Inspector assignment system — coming soon</div></div></div></div>
+    <div id="page-reports" style="display:none;"><div class="card"><div class="card-header"><div class="card-title">Reports</div></div><div class="empty"><div class="empty-icon">📁</div><div class="empty-text">Monthly reports — coming soon</div></div></div></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toast-msg">Complaint submitted successfully!</span>
+</div>
+
+<script>
+// Date
+const d=new Date();
+document.getElementById('dateDisplay').textContent=d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+// Counter animation
+function animateCounters(){
+  document.querySelectorAll('[data-target]').forEach(el=>{
+    const target=parseInt(el.getAttribute('data-target'));
+    let current=0;
+    const step=Math.ceil(target/40);
+    const iv=setInterval(()=>{
+      current=Math.min(current+step,target);
+      el.textContent=current.toLocaleString();
+      if(current>=target)clearInterval(iv);
+    },30);
+  });
+}
+setTimeout(animateCounters,200);
+
+// Page navigation
+const pages={
+  dashboard:{title:'Dashboard',sub:'Maharashtra Food Safety Overview'},
+  complaints:{title:'Complaints',sub:'All submitted complaints'},
+  map:{title:'District Map',sub:'Maharashtra heat map'},
+  submit:{title:'Submit Complaint',sub:'File a new food safety complaint'},
+  inspector:{title:'Inspector Queue',sub:'AI-ranked inspection priorities'},
+  reports:{title:'Reports',sub:'Monthly analytics and exports'},
+};
+function showPage(p){
+  document.querySelectorAll('[id^="page-"]').forEach(el=>el.style.display='none');
+  document.getElementById('page-'+p).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('pageTitle').textContent=pages[p].title;
+  document.getElementById('pageSub').textContent=pages[p].sub;
+}
+
+// AI Complaint Analysis
+async function analyzeComplaint(){
+  const type=document.getElementById('complaint-type').value;
+  const desc=document.getElementById('complaint-desc').value;
+  const district=document.getElementById('district-select').value;
+  if(!type||!desc){showToast('⚠️ Please fill complaint type and description');return;}
+
+  const btn=document.querySelector('.submit-btn');
+  btn.textContent='🤖 Analyzing...';btn.disabled=true;
+
+  try{
+    const res=await fetch('/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type,desc,district})
+    });
+    const data=await res.json();
+    showResult(data.score,data.tags,data.summary);
+  }catch{
+    // Fallback demo
+    const scores={'Expired Products':85,'Illegal Tobacco / Gutkha Sale':90,'Food Adulteration':88,'Dirty Kitchen / Unhygienic':70,'Fake / Counterfeit Product':82};
+    const score=scores[type]||65;
+    showResult(score,['Food Safety Violation','Immediate Action Required','Photo Evidence Needed'],type+' detected in '+district);
+  }
+  btn.textContent='🤖 Analyze & Submit with AI';btn.disabled=false;
+  showToast('✅ Complaint submitted and analyzed!');
+}
+
+function showResult(score,tags,summary){
+  const result=document.getElementById('ai-result');
+  const tagsEl=document.getElementById('ai-tags');
+  tagsEl.innerHTML='';
+  tags.forEach(t=>{
+    const cls=score>=80?'tag-red':score>=60?'tag-yellow':'tag-blue';
+    tagsEl.innerHTML+=`<span class="ai-tag ${cls}">${t}</span>`;
+  });
+  document.getElementById('priority-score-label').textContent=score+'/100';
+  document.getElementById('priority-bar').style.width=score+'%';
+  result.classList.add('show');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// District hover tooltip
+document.querySelectorAll('.district').forEach(d=>{
+  d.addEventListener('mouseenter',function(e){
+    this.style.opacity='0.75';
+  });
+  d.addEventListener('mouseleave',function(){
+    this.style.opacity='1';
+  });
+});
+</script>
+</body>
+</html>
