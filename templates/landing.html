@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDAMitra — Maharashtra Food Safety Complaints</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0A1628;--saffron:#FF6B2B;--green:#16A34A;--red:#DC2626;--yellow:#D97706;
+  --bg:#F7F8FA;--white:#FFFFFF;--border:#E5E7EB;--text:#111827;--text2:#6B7280;--text3:#9CA3AF;
+}
+html,body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+
+/* HEADER */
+.header{
+  background:var(--navy);padding:18px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.header-left{display:flex;align-items:center;gap:12px;}
+.h-icon{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 4px 12px rgba(255,107,43,0.35);
+}
+.h-title{font-size:16px;font-weight:600;color:#fff;}
+.h-sub{font-size:11px;color:rgba(255,255,255,0.4);}
+.admin-link{
+  font-size:12px;color:rgba(255,255,255,0.5);text-decoration:none;
+  border:1px solid rgba(255,255,255,0.15);padding:7px 16px;border-radius:8px;
+  transition:all 0.15s;
+}
+.admin-link:hover{background:rgba(255,255,255,0.05);color:#fff;}
+
+/* HERO */
+.hero{
+  background:var(--navy);padding:48px 32px 64px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:120px;
+  background:linear-gradient(to top,rgba(255,107,43,0.08),transparent);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.2);
+  border-radius:20px;padding:5px 14px;margin-bottom:20px;
+}
+.hero-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.hero-badge span{font-size:12px;color:#4ade80;font-weight:500;}
+.hero h1{font-size:32px;font-weight:600;color:#fff;letter-spacing:-0.5px;margin-bottom:12px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.55);max-width:540px;margin:0 auto;line-height:1.6;}
+
+/* STATS BAR */
+.stats-bar{
+  max-width:900px;margin:-32px auto 0;padding:0 32px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  position:relative;z-index:2;
+}
+.stat-box{
+  background:var(--white);border:1px solid var(--border);border-radius:14px;
+  padding:18px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.06);
+}
+.stat-box-val{font-size:24px;font-weight:600;color:var(--text);}
+.stat-box-label{font-size:11px;color:var(--text2);margin-top:4px;}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:48px 32px 60px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+
+/* INFO CARDS */
+.info-card{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  padding:24px;
+}
+.info-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.info-list{display:flex;flex-direction:column;gap:14px;}
+.info-item{display:flex;gap:12px;align-items:flex-start;}
+.info-icon{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.icon-red{background:#FEF2F2;}
+.icon-yellow{background:#FFFBEB;}
+.icon-blue{background:#EFF6FF;}
+.icon-green{background:#F0FDF4;}
+.info-item-title{font-size:13px;font-weight:500;color:var(--text);}
+.info-item-desc{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5;}
+
+/* FORM CARD */
+.form-card{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;
+}
+.form-header{
+  padding:24px 24px 0;
+}
+.form-header h2{font-size:18px;font-weight:600;margin-bottom:4px;}
+.form-header p{font-size:13px;color:var(--text2);}
+.form-area{padding:20px 24px 24px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px;display:block;}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:10px 12px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:13px;font-family:'Inter',sans-serif;color:var(--text);
+  background:var(--white);outline:none;transition:border-color 0.15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--saffron);box-shadow:0 0 0 3px rgba(255,107,43,0.08);
+}
+.form-textarea{resize:vertical;min-height:90px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.upload-area{
+  border:1.5px dashed var(--border);border-radius:8px;padding:18px;
+  text-align:center;cursor:pointer;transition:all 0.15s;
+}
+.upload-area:hover{border-color:var(--saffron);background:rgba(255,107,43,0.03);}
+.upload-icon{font-size:22px;margin-bottom:5px;}
+.upload-text{font-size:12px;color:var(--text2);}
+.submit-btn{
+  width:100%;padding:12px;border-radius:8px;border:none;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all 0.2s;
+  box-shadow:0 4px 12px rgba(255,107,43,0.25);
+}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,107,43,0.35);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;}
+
+/* AI RESULT */
+.ai-result{
+  margin-top:14px;padding:14px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(255,107,43,0.05),rgba(255,107,43,0.02));
+  border:1px solid rgba(255,107,43,0.15);display:none;
+}
+.ai-result.show{display:block;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ai-result-title{font-size:11px;font-weight:600;color:var(--saffron);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.ai-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+.ai-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;background:#FEF2F2;color:var(--red);}
+.ai-summary{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5;}
+
+/* FOOTER */
+.footer{text-align:center;padding:24px;font-size:11px;color:var(--text3);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:100;
+  background:var(--navy);color:#fff;padding:12px 18px;border-radius:10px;
+  font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.toast.show{transform:none;opacity:1;}
+
+@media(max-width:760px){
+  .grid{grid-template-columns:1fr;}
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="h-icon">⚖️</div>
+    <div>
+      <div class="h-title">FDAMitra</div>
+      <div class="h-sub">Maharashtra FDA · Food Safety Portal</div>
+    </div>
+  </div>
+  <a href="/login" class="admin-link">Officer Login →</a>
+</div>
+
+<div class="hero">
+  <div class="hero-badge"><div class="hero-dot"></div><span>System Live</span></div>
+  <h1>Report a Food Safety Concern</h1>
+  <p>Help keep Maharashtra safe. Submit a complaint about expired products, unhygienic conditions, adulteration, or illegal sales — our AI instantly prioritizes it for FDA inspectors.</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-box"><div class="stat-box-val" id="s-total">—</div><div class="stat-box-label">Total Reports</div></div>
+  <div class="stat-box"><div class="stat-box-val">36</div><div class="stat-box-label">Districts Covered</div></div>
+  <div class="stat-box"><div class="stat-box-val">24/7</div><div class="stat-box-label">AI Monitoring</div></div>
+  <div class="stat-box"><div class="stat-box-val">Free</div><div class="stat-box-label">Always</div></div>
+</div>
+
+<div class="main">
+  <div class="grid">
+    <!-- LEFT: INFO -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="info-card">
+        <div class="info-title">📋 What you can report</div>
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-icon icon-red">🥛</div>
+            <div><div class="info-item-title">Expired Products</div><div class="info-item-desc">Food, drugs, or cosmetics sold past expiry date</div></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon icon-yellow">🧪</div>
+            <div><div class="info-item-title">Food Adulteration</div><div class="info-item-desc">Suspected mixing of harmful or fake substances</div></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon icon-blue">🍳</div>
+            <div><div class="info-item-title">Hygiene Violations</div><div class="info-item-desc">Dirty kitchens, pest infestation, unsafe handling</div></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon icon-green">🚭</div>
+            <div><div class="info-item-title">Illegal Sales</div><div class="info-item-desc">Tobacco/gutkha sold near schools, banned products</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-title">🤖 How it works</div>
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-icon icon-blue">1️⃣</div>
+            <div><div class="info-item-title">You describe what you saw</div><div class="info-item-desc">No login needed. Takes less than 2 minutes.</div></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon icon-blue">2️⃣</div>
+            <div><div class="info-item-title">AI analyzes instantly</div><div class="info-item-desc">Classifies severity and assigns a priority score</div></div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon icon-blue">3️⃣</div>
+            <div><div class="info-item-title">Sent to FDA inspectors</div><div class="info-item-desc">Higher priority cases get faster attention</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: FORM -->
+    <div class="form-card">
+      <div class="form-header">
+        <h2>Submit a Complaint</h2>
+        <p>Your report helps protect public health across Maharashtra</p>
+      </div>
+      <div class="form-area">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name (optional)</label>
+            <input class="form-input" type="text" id="name" placeholder="Anonymous if left blank"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">District</label>
+            <select class="form-select" id="district-select">
+              <option value="">Select district</option>
+              <option>Mumbai</option><option>Pune</option><option>Nashik</option>
+              <option>Nagpur</option><option>Aurangabad</option><option>Thane</option>
+              <option>Kolhapur</option><option>Solapur</option><option>Amravati</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location / Establishment Name</label>
+          <input class="form-input" type="text" id="location" placeholder="Shop name, restaurant, market etc."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Complaint Type</label>
+          <select class="form-select" id="complaint-type">
+            <option value="">Select type</option>
+            <option>Expired Products</option>
+            <option>Food Adulteration</option>
+            <option>Dirty Kitchen / Unhygienic</option>
+            <option>Illegal Tobacco / Gutkha Sale</option>
+            <option>Fake / Counterfeit Product</option>
+            <option>Wrong Labeling / Misbranding</option>
+            <option>Drug Quality Issue</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" id="complaint-desc" placeholder="Describe what you saw in detail..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Photo Evidence (optional)</label>
+          <div class="upload-area">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Click to upload photo · JPG, PNG up to 10MB</div>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="analyzeComplaint()">🤖 Submit Complaint</button>
+        <div class="ai-result" id="ai-result">
+          <div class="ai-result-title">✅ Complaint Received</div>
+          <div class="ai-tags" id="ai-tags"></div>
+          <div class="ai-summary" id="ai-summary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">FDAMitra · An independent AI tool built to support Maharashtra FDA's food safety mission</div>
+
+<div class="toast" id="toast">
+  <span>✅</span><span id="toast-msg">Complaint submitted successfully!</span>
+</div>
+
+<script>
+async function loadPublicStats(){
+  try{
+    const res=await fetch('/stats');
+    const data=await res.json();
+    document.getElementById('s-total').textContent=data.total||0;
+  }catch(e){}
+}
+loadPublicStats();
+
+async function analyzeComplaint(){
+  const type=document.getElementById('complaint-type').value;
+  const desc=document.getElementById('complaint-desc').value;
+  const district=document.getElementById('district-select').value;
+  const location=document.getElementById('location').value;
+  const name=document.getElementById('name').value;
+
+  if(!type||!desc||!district){
+    showToast('⚠️ Please fill district, type and description');
+    return;
+  }
+
+  const btn=document.querySelector('.submit-btn');
+  btn.textContent='🤖 Submitting...';btn.disabled=true;
+
+  try{
+    const res=await fetch('/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type,desc,district,location,name})
+    });
+    const data=await res.json();
+    showResult(data.tags||[],data.summary||'Your complaint has been received and prioritized.');
+    loadPublicStats();
+    // Clear form
+    document.getElementById('complaint-desc').value='';
+    document.getElementById('location').value='';
+  }catch(e){
+    showToast('⚠️ Something went wrong. Please try again.');
+  }
+  btn.textContent='🤖 Submit Complaint';btn.disabled=false;
+}
+
+function showResult(tags,summary){
+  const result=document.getElementById('ai-result');
+  const tagsEl=document.getElementById('ai-tags');
+  tagsEl.innerHTML=tags.map(t=>`<span class="ai-tag">${t}</span>`).join('');
+  document.getElementById('ai-summary').textContent=summary;
+  result.classList.add('show');
+  showToast('✅ Complaint submitted! Thank you for reporting.');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

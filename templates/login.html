@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDAMitra — Officer Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0A1628;--saffron:#FF6B2B;--text2:#6B7280;--text3:#9CA3AF;--border:#E5E7EB;--red:#DC2626;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;}
+
+.bg-glow{
+  position:fixed;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,107,43,0.08),transparent 70%);
+  top:-150px;right:-150px;
+}
+
+.card{
+  width:100%;max-width:380px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:36px 32px;
+  position:relative;z-index:1;
+  animation:fadeUp 0.5s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.logo-wrap{text-align:center;margin-bottom:28px;}
+.logo-icon{
+  width:52px;height:52px;border-radius:15px;margin:0 auto 14px;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 8px 24px rgba(255,107,43,0.35);
+}
+.logo-title{font-size:18px;font-weight:600;letter-spacing:-0.3px;}
+.logo-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;}
+
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:7px;display:block;}
+.form-input{
+  width:100%;padding:11px 14px;border-radius:10px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);color:#fff;
+  font-size:14px;font-family:'Inter',sans-serif;outline:none;
+  transition:border-color 0.2s;
+}
+.form-input::placeholder{color:rgba(255,255,255,0.25);}
+.form-input:focus{border-color:var(--saffron);box-shadow:0 0 0 3px rgba(255,107,43,0.1);}
+
+.login-btn{
+  width:100%;padding:12px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--saffron),#FF4500);
+  color:#fff;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;margin-top:8px;
+  transition:all 0.2s;box-shadow:0 4px 16px rgba(255,107,43,0.3);
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,107,43,0.4);}
+.login-btn:disabled{opacity:0.6;cursor:not-allowed;}
+
+.error-msg{
+  background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.25);
+  border-radius:8px;padding:10px 14px;font-size:12px;color:#fca5a5;
+  margin-bottom:16px;display:none;
+}
+.error-msg.show{display:block;animation:fadeUp 0.3s ease;}
+
+.back-link{
+  display:block;text-align:center;margin-top:20px;
+  font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;
+}
+.back-link:hover{color:rgba(255,255,255,0.6);}
+
+.footer-note{
+  text-align:center;font-size:11px;color:rgba(255,255,255,0.2);
+  margin-top:28px;
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo-icon">⚖️</div>
+    <div class="logo-title">FDAMitra</div>
+    <div class="logo-sub">Officer & Inspector Login</div>
+  </div>
+
+  <div class="error-msg" id="error-msg">Invalid username or password.</div>
+
+  <div class="form-group">
+    <label class="form-label">Username</label>
+    <input class="form-input" type="text" id="username" placeholder="Enter your username" onkeydown="if(event.key==='Enter')doLogin()"/>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Password</label>
+    <input class="form-input" type="password" id="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/>
+  </div>
+
+  <button class="login-btn" onclick="doLogin()" id="login-btn">Sign In</button>
+
+  <a href="/" class="back-link">← Back to public complaint portal</a>
+  <div class="footer-note">Authorized FDA personnel only</div>
+</div>
+
+<script>
+async function doLogin(){
+  const username=document.getElementById('username').value.trim();
+  const password=document.getElementById('password').value;
+  const errorEl=document.getElementById('error-msg');
+  const btn=document.getElementById('login-btn');
+
+  if(!username||!password){
+    errorEl.textContent='Please enter both username and password.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  btn.textContent='Signing in...';btn.disabled=true;
+  errorEl.classList.remove('show');
+
+  try{
+    const res=await fetch('/login',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username,password})
+    });
+    const data=await res.json();
+    if(data.success){
+      window.location.href='/dashboard';
+    }else{
+      errorEl.textContent=data.message||'Invalid username or password.';
+      errorEl.classList.add('show');
+      btn.textContent='Sign In';btn.disabled=false;
+    }
+  }catch(e){
+    errorEl.textContent='Connection error. Please try again.';
+    errorEl.classList.add('show');
+    btn.textContent='Sign In';btn.disabled=false;
+  }
+}
+</script>
+</body>
+</html>

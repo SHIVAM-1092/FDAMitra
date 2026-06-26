@@ -79,10 +79,17 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
   display:flex;align-items:center;gap:10px;
   padding:10px;border-radius:10px;
   background:rgba(255,255,255,0.04);
+  margin-bottom:8px;
 }
 .officer-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .officer-name{font-size:12px;font-weight:500;color:#fff;}
 .officer-role{font-size:10px;color:rgba(255,255,255,0.35);}
+.logout-link{
+  display:block;text-align:center;font-size:11px;color:rgba(255,255,255,0.35);
+  text-decoration:none;padding:7px;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);transition:all 0.15s;
+}
+.logout-link:hover{background:rgba(255,255,255,0.05);color:#fff;}
 
 /* MAIN */
 .main{display:flex;flex-direction:column;overflow:hidden;}
@@ -366,10 +373,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
     <div class="officer-card">
       <div class="officer-av">👮</div>
       <div>
-        <div class="officer-name">FDA Inspector</div>
-        <div class="officer-role">Maharashtra · Pune Division</div>
+        <div class="officer-name">FDA Officer</div>
+        <div class="officer-role">Maharashtra · Admin Access</div>
       </div>
     </div>
+    <a href="/logout" class="logout-link">Log out</a>
   </div>
 </aside>
 
@@ -430,36 +438,30 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
           </div>
           <div class="map-area">
             <svg class="map-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
-              <!-- Simplified Maharashtra districts as blocks -->
-              <!-- Row 1 - North -->
               <rect class="district critical" x="10" y="10" width="70" height="50" rx="4" title="Nashik"/>
               <rect class="district high" x="90" y="10" width="70" height="50" rx="4"/>
               <rect class="district medium" x="170" y="10" width="70" height="50" rx="4"/>
               <rect class="district low" x="250" y="10" width="70" height="50" rx="4"/>
               <rect class="district none" x="330" y="10" width="70" height="50" rx="4"/>
               <rect class="district high" x="410" y="10" width="80" height="50" rx="4"/>
-              <!-- Row 2 -->
               <rect class="district high" x="10" y="70" width="70" height="50" rx="4"/>
               <rect class="district critical" x="90" y="70" width="70" height="50" rx="4"/>
               <rect class="district medium" x="170" y="70" width="70" height="50" rx="4"/>
               <rect class="district high" x="250" y="70" width="70" height="50" rx="4"/>
               <rect class="district low" x="330" y="70" width="70" height="50" rx="4"/>
               <rect class="district medium" x="410" y="70" width="80" height="50" rx="4"/>
-              <!-- Row 3 -->
               <rect class="district medium" x="10" y="130" width="70" height="50" rx="4"/>
               <rect class="district low" x="90" y="130" width="70" height="50" rx="4"/>
               <rect class="district critical" x="170" y="130" width="70" height="50" rx="4"/>
               <rect class="district medium" x="250" y="130" width="70" height="50" rx="4"/>
               <rect class="district none" x="330" y="130" width="70" height="50" rx="4"/>
               <rect class="district low" x="410" y="130" width="80" height="50" rx="4"/>
-              <!-- Row 4 - South -->
               <rect class="district low" x="10" y="190" width="70" height="50" rx="4"/>
               <rect class="district none" x="90" y="190" width="70" height="50" rx="4"/>
               <rect class="district medium" x="170" y="190" width="70" height="50" rx="4"/>
               <rect class="district high" x="250" y="190" width="70" height="50" rx="4"/>
               <rect class="district low" x="330" y="190" width="70" height="50" rx="4"/>
               <rect class="district none" x="410" y="190" width="80" height="50" rx="4"/>
-              <!-- Labels -->
               <text x="45" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nashik</text>
               <text x="125" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Dhule</text>
               <text x="205" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Jalgaon</text>
@@ -497,7 +499,6 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
         <!-- Side Panel -->
         <div class="side-panel">
-          <!-- Top Priority -->
           <div class="card">
             <div class="card-header">
               <div>
@@ -531,7 +532,6 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
             </div>
           </div>
 
-          <!-- Quick Stats -->
           <div class="card">
             <div class="card-header">
               <div class="card-title">District Summary</div>
@@ -841,7 +841,6 @@ async function analyzeComplaint(){
     const data=await res.json();
     showResult(data.score,data.tags,data.summary);
   }catch{
-    // Fallback demo
     const scores={'Expired Products':85,'Illegal Tobacco / Gutkha Sale':90,'Food Adulteration':88,'Dirty Kitchen / Unhygienic':70,'Fake / Counterfeit Product':82};
     const score=scores[type]||65;
     showResult(score,['Food Safety Violation','Immediate Action Required','Photo Evidence Needed'],type+' detected in '+district);
@@ -872,14 +871,9 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// District hover tooltip
 document.querySelectorAll('.district').forEach(d=>{
-  d.addEventListener('mouseenter',function(e){
-    this.style.opacity='0.75';
-  });
-  d.addEventListener('mouseleave',function(){
-    this.style.opacity='1';
-  });
+  d.addEventListener('mouseenter',function(e){this.style.opacity='0.75';});
+  d.addEventListener('mouseleave',function(){this.style.opacity='1';});
 });
 </script>
 </body>

@@ -1,13 +1,20 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from groq import Groq
 import sqlite3
 import datetime
 import json
+import os
+from functools import wraps
 
 app = Flask(__name__)
-import os
+app.secret_key = os.environ.get("SECRET_KEY", "fdamitra-secret-key-2026")
+
 API_KEY = os.environ.get("GROQ_API_KEY", "")
 client = Groq(api_key=API_KEY)
+
+# Admin credentials — change these
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "fdamitra_admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Maharashtra@2026")
 
 SYSTEM_PROMPT = """You are FDAMitra AI — an intelligent food safety complaint analyzer for Maharashtra FDA.
 
@@ -94,13 +101,49 @@ def get_stats():
     pending = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM complaints WHERE status='Resolved'")
     resolved = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM complaints")
+    total = c.fetchone()[0]
     conn.close()
-    return {"critical": critical, "pending": pending, "resolved": resolved}
+    return {"critical": critical, "pending": pending, "resolved": resolved, "total": total}
 
+# ─── AUTH DECORATOR ───
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
+
+# ─── PUBLIC ROUTES ───
 @app.route("/")
 def home():
+    return render_template("landing.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        data = request.json
+        username = data.get("username", "")
+        password = data.get("password", "")
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session["logged_in"] = True
+            session["username"] = username
+            return jsonify({"success": True})
+        return jsonify({"success": False, "message": "Invalid credentials"})
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
     return render_template("index.html")
 
+# ─── PUBLIC API (anyone can submit a complaint) ───
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.json
@@ -128,7 +171,6 @@ Provide priority score and analysis."""
             temperature=0.3,
         )
         raw = response.choices[0].message.content.strip()
-        # Clean JSON
         if "```" in raw:
             raw = raw.split("```")[1]
             if raw.startswith("json"):
@@ -138,7 +180,6 @@ Provide priority score and analysis."""
         return jsonify(analysis)
 
     except Exception as e:
-        # Smart fallback
         scores = {
             'Expired Products': 85, 'Illegal Tobacco / Gutkha Sale': 90,
             'Food Adulteration': 88, 'Dirty Kitchen / Unhygienic': 70,
@@ -158,7 +199,9 @@ Provide priority score and analysis."""
         save_complaint(data, analysis)
         return jsonify(analysis)
 
+# ─── ADMIN-ONLY API ───
 @app.route("/complaints", methods=["GET"])
+@login_required
 def complaints():
     rows = get_all_complaints()
     result = []
@@ -182,6 +225,5 @@ if __name__ == "__main__":
     print("  FDAMitra Backend Running!")
     print("  http://localhost:5000")
     print("="*50 + "\n")
-    import os
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
