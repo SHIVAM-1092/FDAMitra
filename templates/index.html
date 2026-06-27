@@ -164,16 +164,81 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
 /* MAP AREA */
 .map-area{padding:20px;position:relative;}
-.map-svg{width:100%;height:280px;}
+.district-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.district-cell{
+  aspect-ratio:1.3;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:9px;font-weight:600;color:#fff;padding:4px;
+  transition:all 0.15s;border:2px solid transparent;
+  line-height:1.2;
+}
+.district-cell:hover{transform:scale(1.06);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+.district-cell.selected{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy);}
+.district-cell.critical{background:#DC2626;}
+.district-cell.high{background:#F97316;}
+.district-cell.medium{background:#FBBF24;color:#111827;}
+.district-cell.low{background:#16A34A;}
+.district-cell.none{background:#D1FAE5;color:#065F46;}
+.district-count{display:block;font-size:8px;opacity:0.85;font-weight:400;margin-top:1px;}
 
-/* Maharashtra SVG districts - simplified shapes */
-.district{cursor:pointer;transition:all 0.2s;stroke:#fff;stroke-width:0.8;}
-.district:hover{opacity:0.8;stroke-width:1.5;}
-.district.critical{fill:#DC2626;}
-.district.high{fill:#F97316;}
-.district.medium{fill:#FBBF24;}
-.district.low{fill:#16A34A;}
-.district.none{fill:#D1FAE5;}
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,22,40,0.6);
+  display:none;align-items:center;justify-content:center;z-index:200;
+  padding:20px;backdrop-filter:blur(2px);
+}
+.modal-overlay.show{display:flex;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{
+  background:var(--white);border-radius:16px;width:100%;max-width:520px;
+  max-height:85vh;overflow-y:auto;
+  animation:modalIn 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:none}}
+.modal-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;
+  position:sticky;top:0;background:var(--white);
+}
+.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--text2);}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+  background:var(--white);cursor:pointer;font-size:16px;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.modal-close:hover{background:var(--bg);}
+.modal-body{padding:20px 24px;}
+.modal-score-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.modal-score-badge{
+  font-size:22px;font-weight:700;padding:8px 16px;border-radius:10px;
+}
+.modal-score-badge.score-critical{background:#FEF2F2;color:var(--red);}
+.modal-score-badge.score-high{background:#FFFBEB;color:var(--yellow);}
+.modal-score-badge.score-medium{background:#EFF6FF;color:#2563EB;}
+.modal-severity{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;}
+.modal-severity.score-critical{background:#FEF2F2;color:var(--red);}
+.modal-severity.score-high{background:#FFFBEB;color:var(--yellow);}
+.modal-severity.score-medium{background:#EFF6FF;color:#2563EB;}
+.modal-field{margin-bottom:16px;}
+.modal-field-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;font-weight:500;margin-bottom:5px;}
+.modal-field-value{font-size:13px;color:var(--text);line-height:1.6;}
+.modal-tags-row{display:flex;flex-wrap:wrap;gap:6px;}
+.modal-evidence{
+  border:1.5px dashed var(--border);border-radius:10px;padding:24px;
+  text-align:center;color:var(--text2);font-size:12px;background:var(--bg);
+}
+.modal-evidence-icon{font-size:24px;margin-bottom:6px;display:block;opacity:0.4;}
+
+/* DISTRICT FILTER BANNER */
+.district-filter-banner{
+  display:none;background:rgba(255,107,43,0.06);border:1px solid rgba(255,107,43,0.15);
+  border-radius:10px;padding:10px 16px;margin-bottom:14px;
+  align-items:center;justify-content:space-between;
+}
+.district-filter-banner.show{display:flex;}
+.dfb-text{font-size:12px;color:var(--text);font-weight:500;}
+.dfb-clear{font-size:11px;color:var(--saffron);font-weight:500;cursor:pointer;background:none;border:none;}
 
 .map-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
@@ -437,56 +502,7 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
             <div class="card-action">Full Map →</div>
           </div>
           <div class="map-area">
-            <svg class="map-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
-              <rect class="district critical" x="10" y="10" width="70" height="50" rx="4" title="Nashik"/>
-              <rect class="district high" x="90" y="10" width="70" height="50" rx="4"/>
-              <rect class="district medium" x="170" y="10" width="70" height="50" rx="4"/>
-              <rect class="district low" x="250" y="10" width="70" height="50" rx="4"/>
-              <rect class="district none" x="330" y="10" width="70" height="50" rx="4"/>
-              <rect class="district high" x="410" y="10" width="80" height="50" rx="4"/>
-              <rect class="district high" x="10" y="70" width="70" height="50" rx="4"/>
-              <rect class="district critical" x="90" y="70" width="70" height="50" rx="4"/>
-              <rect class="district medium" x="170" y="70" width="70" height="50" rx="4"/>
-              <rect class="district high" x="250" y="70" width="70" height="50" rx="4"/>
-              <rect class="district low" x="330" y="70" width="70" height="50" rx="4"/>
-              <rect class="district medium" x="410" y="70" width="80" height="50" rx="4"/>
-              <rect class="district medium" x="10" y="130" width="70" height="50" rx="4"/>
-              <rect class="district low" x="90" y="130" width="70" height="50" rx="4"/>
-              <rect class="district critical" x="170" y="130" width="70" height="50" rx="4"/>
-              <rect class="district medium" x="250" y="130" width="70" height="50" rx="4"/>
-              <rect class="district none" x="330" y="130" width="70" height="50" rx="4"/>
-              <rect class="district low" x="410" y="130" width="80" height="50" rx="4"/>
-              <rect class="district low" x="10" y="190" width="70" height="50" rx="4"/>
-              <rect class="district none" x="90" y="190" width="70" height="50" rx="4"/>
-              <rect class="district medium" x="170" y="190" width="70" height="50" rx="4"/>
-              <rect class="district high" x="250" y="190" width="70" height="50" rx="4"/>
-              <rect class="district low" x="330" y="190" width="70" height="50" rx="4"/>
-              <rect class="district none" x="410" y="190" width="80" height="50" rx="4"/>
-              <text x="45" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nashik</text>
-              <text x="125" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Dhule</text>
-              <text x="205" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Jalgaon</text>
-              <text x="285" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Aurangabad</text>
-              <text x="365" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Latur</text>
-              <text x="450" y="40" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nanded</text>
-              <text x="45" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Pune</text>
-              <text x="125" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Mumbai</text>
-              <text x="205" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Thane</text>
-              <text x="285" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Raigad</text>
-              <text x="365" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Satara</text>
-              <text x="450" y="100" text-anchor="middle" font-size="8" fill="white" font-weight="500">Sangli</text>
-              <text x="45" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Kolhapur</text>
-              <text x="125" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Solapur</text>
-              <text x="205" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Nagpur</text>
-              <text x="285" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Wardha</text>
-              <text x="365" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Yavatmal</text>
-              <text x="450" y="160" text-anchor="middle" font-size="8" fill="white" font-weight="500">Amravati</text>
-              <text x="45" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Akola</text>
-              <text x="125" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Buldhana</text>
-              <text x="205" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Washim</text>
-              <text x="285" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Beed</text>
-              <text x="365" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Osmanabad</text>
-              <text x="450" y="220" text-anchor="middle" font-size="8" fill="white" font-weight="500">Hingoli</text>
-            </svg>
+            <div class="district-grid" id="districtGrid"></div>
             <div class="map-legend">
               <div class="legend-item"><div class="legend-dot" style="background:#DC2626"></div>Critical (10+)</div>
               <div class="legend-item"><div class="legend-dot" style="background:#F97316"></div>High (5-9)</div>
@@ -685,6 +701,12 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
           </div>
           <div class="card-action" onclick="loadComplaints()">Refresh</div>
         </div>
+        <div style="padding:16px 20px 0;">
+          <div class="district-filter-banner" id="districtFilterBanner">
+            <span class="dfb-text" id="dfbText">Filtered by district</span>
+            <button class="dfb-clear" onclick="clearDistrictFilter()">Clear filter ✕</button>
+          </div>
+        </div>
         <div class="complaints-list" id="complaints-list-real">
           <div class="empty">
             <div class="empty-icon">📋</div>
@@ -703,6 +725,22 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 <div class="toast" id="toast">
   <span class="toast-icon">✅</span>
   <span id="toast-msg">Complaint submitted successfully!</span>
+</div>
+
+<!-- COMPLAINT DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Complaint Details</div>
+        <div class="modal-sub" id="modalSub">Loading...</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading complaint...</div></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -741,16 +779,25 @@ function scoreClass(score){
 
 async function loadComplaints(){
   const container=document.getElementById('complaints-list-real');
+  const banner=document.getElementById('districtFilterBanner');
   try{
-    const res=await fetch('/complaints');
+    let url='/complaints';
+    if(activeDistrictFilter){
+      url='/district/'+encodeURIComponent(activeDistrictFilter)+'/complaints';
+      banner.classList.add('show');
+      document.getElementById('dfbText').textContent='Showing complaints from '+activeDistrictFilter;
+    }else{
+      banner.classList.remove('show');
+    }
+    const res=await fetch(url);
     const data=await res.json();
     if(!data.length){
-      container.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No complaints yet. Submit one to see it here.</div></div>';
+      container.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No complaints found'+(activeDistrictFilter?' for '+activeDistrictFilter:' yet')+'.</div></div>';
       return;
     }
     container.innerHTML=data.map(c=>{
       const cls=scoreClass(c.score);
-      return `<div class="complaint-item">
+      return `<div class="complaint-item" onclick="openComplaintModal(${c.id})">
         <div class="ci-priority ${cls.priority}"></div>
         <div class="ci-info">
           <div class="ci-title">${c.summary||c.type}</div>
@@ -774,7 +821,7 @@ async function loadDashboardComplaints(){
     if(!data.length)return;
     container.innerHTML=data.slice(0,4).map(c=>{
       const cls=scoreClass(c.score);
-      return `<div class="complaint-item">
+      return `<div class="complaint-item" onclick="openComplaintModal(${c.id})">
         <div class="ci-priority ${cls.priority}"></div>
         <div class="ci-info">
           <div class="ci-title">${c.summary||c.type}</div>
@@ -801,7 +848,105 @@ async function loadStats(){
 // Load real data on page load
 window.addEventListener('DOMContentLoaded',()=>{
   loadDashboardComplaints();
+  loadDistrictGrid();
 });
+
+let activeDistrictFilter=null;
+
+async function loadDistrictGrid(){
+  const grid=document.getElementById('districtGrid');
+  if(!grid)return;
+  try{
+    const res=await fetch('/districts');
+    const data=await res.json();
+    grid.innerHTML=Object.entries(data).map(([name,info])=>{
+      return `<div class="district-cell ${info.level}" onclick="filterByDistrict('${name}')" title="${name}: ${info.count} complaints">
+        ${name}<span class="district-count">${info.count}</span>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML='<div class="empty-text">Could not load district data</div>';
+  }
+}
+
+function filterByDistrict(name){
+  activeDistrictFilter=name;
+  // Switch to complaints page
+  document.querySelectorAll('[id^="page-"]').forEach(el=>el.style.display='none');
+  document.getElementById('page-complaints').style.display='block';
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[1].classList.add('active');
+  document.getElementById('pageTitle').textContent='Complaints';
+  document.getElementById('pageSub').textContent='Filtered by district';
+  loadComplaints();
+}
+
+function clearDistrictFilter(){
+  activeDistrictFilter=null;
+  loadComplaints();
+}
+
+// Modal functions
+async function openComplaintModal(id){
+  const overlay=document.getElementById('modalOverlay');
+  const body=document.getElementById('modalBody');
+  overlay.classList.add('show');
+  document.getElementById('modalTitle').textContent='Complaint Details';
+  document.getElementById('modalSub').textContent='Loading...';
+  body.innerHTML='<div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading complaint...</div></div>';
+
+  try{
+    const res=await fetch('/complaint/'+id);
+    const c=await res.json();
+    if(c.error){
+      body.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load this complaint.</div></div>';
+      return;
+    }
+    const cls=scoreClass(c.score);
+    document.getElementById('modalTitle').textContent=c.category||c.type||'Complaint';
+    document.getElementById('modalSub').textContent=(c.district||'Maharashtra')+' · '+timeAgo(c.timestamp);
+
+    body.innerHTML=`
+      <div class="modal-score-row">
+        <div class="modal-score-badge ${cls.score}">${c.score}/100</div>
+        <span class="modal-severity ${cls.score}">${c.severity||'—'}</span>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Complainant</div>
+        <div class="modal-field-value">${c.complainant_name || 'Anonymous'}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Location</div>
+        <div class="modal-field-value">${c.location || 'Not specified'} · ${c.district || 'Maharashtra'}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Full Complaint</div>
+        <div class="modal-field-value">${c.description || c.summary || 'No description provided.'}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">AI Tags</div>
+        <div class="modal-tags-row">${(c.tags||[]).map(t=>`<span class="ai-tag tag-${c.score>=80?'red':c.score>=60?'yellow':'blue'}">${t}</span>`).join('')}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Recommended Action</div>
+        <div class="modal-field-value">${c.action || 'Schedule inspection'}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-field-label">Photo Evidence</div>
+        <div class="modal-evidence">
+          <span class="modal-evidence-icon">📷</span>
+          No photo was attached to this complaint
+        </div>
+      </div>
+    `;
+  }catch(e){
+    body.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Something went wrong loading this complaint.</div></div>';
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+}
 
 // Page navigation
 const pages={

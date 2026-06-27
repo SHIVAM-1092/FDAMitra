@@ -55,9 +55,15 @@ def setup_db():
             tags TEXT,
             summary TEXT,
             recommended_action TEXT,
-            status TEXT DEFAULT 'Pending'
+            status TEXT DEFAULT 'Pending',
+            complainant_name TEXT
         )
     """)
+    # Add column if upgrading from older schema
+    try:
+        c.execute("ALTER TABLE complaints ADD COLUMN complainant_name TEXT")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
     conn.close()
 
@@ -66,8 +72,8 @@ def save_complaint(data, analysis):
     c = conn.cursor()
     c.execute("""
         INSERT INTO complaints 
-        (timestamp, district, location, complaint_type, description, score, severity, category, tags, summary, recommended_action)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (timestamp, district, location, complaint_type, description, score, severity, category, tags, summary, recommended_action, complainant_name)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         datetime.datetime.now().isoformat(),
         data.get('district', ''),
@@ -79,7 +85,8 @@ def save_complaint(data, analysis):
         analysis.get('category', ''),
         json.dumps(analysis.get('tags', [])),
         analysis.get('summary', ''),
-        analysis.get('recommended_action', '')
+        analysis.get('recommended_action', ''),
+        data.get('name', '')
     ))
     conn.commit()
     conn.close()
@@ -105,6 +112,66 @@ def get_stats():
     total = c.fetchone()[0]
     conn.close()
     return {"critical": critical, "pending": pending, "resolved": resolved, "total": total}
+
+# All 36 Maharashtra districts
+ALL_DISTRICTS = [
+    "Mumbai City","Mumbai Suburban","Thane","Palghar","Raigad","Ratnagiri","Sindhudurg",
+    "Pune","Satara","Sangli","Solapur","Kolhapur",
+    "Nashik","Dhule","Nandurbar","Jalgaon","Ahmednagar",
+    "Aurangabad","Jalna","Beed","Latur","Osmanabad","Nanded","Parbhani","Hingoli",
+    "Amravati","Akola","Washim","Buldhana","Yavatmal",
+    "Nagpur","Wardha","Chandrapur","Gadchiroli","Gondia","Bhandara"
+]
+
+def get_district_data():
+    conn = sqlite3.connect("fdamitra.db")
+    c = conn.cursor()
+    result = {}
+    for d in ALL_DISTRICTS:
+        c.execute("SELECT COUNT(*) FROM complaints WHERE district=?", (d,))
+        count = c.fetchone()[0]
+        if count >= 10: level = "critical"
+        elif count >= 5: level = "high"
+        elif count >= 2: level = "medium"
+        elif count == 1: level = "low"
+        else: level = "none"
+        result[d] = {"count": count, "level": level}
+    conn.close()
+    return result
+
+def get_complaints_by_district(district):
+    conn = sqlite3.connect("fdamitra.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM complaints WHERE district=? ORDER BY score DESC, timestamp DESC", (district,))
+    rows = c.fetchall()
+    conn.close()
+    result = []
+    for r in rows:
+        result.append({
+            "id": r[0], "timestamp": r[1], "district": r[2],
+            "location": r[3], "type": r[4], "description": r[5],
+            "score": r[6], "severity": r[7], "category": r[8],
+            "tags": json.loads(r[9]) if r[9] else [],
+            "summary": r[10], "action": r[11], "status": r[12]
+        })
+    return result
+
+def get_complaint_by_id(complaint_id):
+    conn = sqlite3.connect("fdamitra.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM complaints WHERE id=?", (complaint_id,))
+    r = c.fetchone()
+    conn.close()
+    if not r:
+        return None
+    return {
+        "id": r[0], "timestamp": r[1], "district": r[2],
+        "location": r[3], "type": r[4], "description": r[5],
+        "score": r[6], "severity": r[7], "category": r[8],
+        "tags": json.loads(r[9]) if r[9] else [],
+        "summary": r[10], "action": r[11], "status": r[12],
+        "complainant_name": r[13] if len(r) > 13 else None
+    }
 
 # ─── AUTH DECORATOR ───
 def login_required(f):
@@ -211,9 +278,28 @@ def complaints():
             "location": r[3], "type": r[4], "description": r[5],
             "score": r[6], "severity": r[7], "category": r[8],
             "tags": json.loads(r[9]) if r[9] else [],
-            "summary": r[10], "action": r[11], "status": r[12]
+            "summary": r[10], "action": r[11], "status": r[12],
+            "complainant_name": r[13] if len(r) > 13 else None
         })
     return jsonify(result)
+
+@app.route("/complaint/<int:complaint_id>", methods=["GET"])
+@login_required
+def complaint_detail(complaint_id):
+    c = get_complaint_by_id(complaint_id)
+    if not c:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(c)
+
+@app.route("/districts", methods=["GET"])
+@login_required
+def districts():
+    return jsonify(get_district_data())
+
+@app.route("/district/<district_name>/complaints", methods=["GET"])
+@login_required
+def district_complaints(district_name):
+    return jsonify(get_complaints_by_district(district_name))
 
 @app.route("/stats", methods=["GET"])
 def stats():

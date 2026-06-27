@@ -94,11 +94,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);colo
 
   <div class="form-group">
     <label class="form-label">Username</label>
-    <input class="form-input" type="text" id="username" placeholder="Enter your username" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <input class="form-input" type="text" id="username" name="fda-user-field" placeholder="Enter your username" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
   </div>
   <div class="form-group">
     <label class="form-label">Password</label>
-    <input class="form-input" type="password" id="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <input class="form-input" type="password" id="password" name="fda-pass-field" placeholder="Enter your password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doLogin()"/>
   </div>
 
   <button class="login-btn" onclick="doLogin()" id="login-btn">Sign In</button>
