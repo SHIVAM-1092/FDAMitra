@@ -67,6 +67,10 @@ def setup_db():
     conn.commit()
     conn.close()
 
+# Run DB setup at import time so it works under gunicorn/production too,
+# not only when this file is executed directly.
+setup_db()
+
 def save_complaint(data, analysis):
     conn = sqlite3.connect("fdamitra.db")
     c = conn.cursor()
@@ -152,7 +156,8 @@ def get_complaints_by_district(district):
             "location": r[3], "type": r[4], "description": r[5],
             "score": r[6], "severity": r[7], "category": r[8],
             "tags": json.loads(r[9]) if r[9] else [],
-            "summary": r[10], "action": r[11], "status": r[12]
+            "summary": r[10], "action": r[11], "status": r[12],
+            "complainant_name": r[13] if len(r) > 13 else None
         })
     return result
 
@@ -306,7 +311,6 @@ def stats():
     return jsonify(get_stats())
 
 if __name__ == "__main__":
-    setup_db()
     print("\n" + "="*50)
     print("  FDAMitra Backend Running!")
     print("  http://localhost:5000")
